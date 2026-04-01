@@ -1,9 +1,11 @@
 let cardList = document.getElementById('cardList')
 let categoryList = document.getElementById('categoryList')
 let cartList = document.getElementById('cartList')
+let srcList = document.getElementById('srcList')
 let count = document.getElementById('count')
 let searcg = document.getElementById('search')
 let srchinput = document.getElementById('srchinput')
+const Base_API = 'https://69b3c331e224ec066bdd03a6.mockapi.io/api/v1/Product'
 
 let data = []
 
@@ -22,26 +24,26 @@ function getCategory() {
 
 getCategory()
 
-fetch('https://69b3c331e224ec066bdd03a6.mockapi.io/api/v1/Product')
+fetch(Base_API)
     .then(res => res.json())
     .then(getData => {
         data = getData
-        getDataRender(data)
+        getWholeData()
     }
 )
 
 
-function getDataRender(data) {
-    cardList.innerHTML = data.map(item =>
-        ` <div class="border border-green-400 p-3 h-fit rounded-lg">
-            <img src="${item.image}" class="w-full h-full object-cover rounded">
-                <h4 class="mt-2 font-bold">${item.title}</h4>
-                <h5 class="mt-2 text-yellow-400 italic">${item.category}</h5>
-                <p class="text-green-400">${item.price} AZN</p>
-                <p onclick="addCart(${item.id})" class="mt-4 text-green-400 cursor-pointer"><i class="fa-solid fa-cart-shopping text-yellow-400 text-xl"></i>Sebete elave et</p>
-        </div>`
-    ).join('')
-}
+// function getDataRender(data) {
+//     cardList.innerHTML = data.map(item =>
+//         ` <div class="border border-green-400 p-3 h-fit rounded-lg">
+//             <img src="${item.image}" class="w-full h-full object-cover rounded">
+//                 <h4 class="mt-2 font-bold">${item.title}</h4>
+//                 <h5 class="mt-2 text-yellow-400 italic">${item.category}</h5>
+//                 <p class="text-green-400">${item.price} AZN</p>
+//                 <p onclick="addCart(${item.id})" class="mt-4 text-green-400 cursor-pointer"><i class="fa-solid fa-cart-shopping text-yellow-400 text-xl"></i>Sebete elave et</p>
+//         </div>`
+//     ).join('')
+// }
 
 
 function sortData(name) {
@@ -143,6 +145,19 @@ function removeItem(index) {
 
 }
 
+function srcListData(data) {
+    srcList.innerHTML = data.map(s => `
+        <div onclick="getDetail(${s.id})" class="grid hover:shadow-lg cursor-pointer sm:grid-cols-3 items-center gap-2">
+            <div class="w-24 h-24 shrink-0 p-4 rounded-md">
+                <img src="${s.image}" class="w-full h-full object-contain" />
+            </div>
+            <div>
+                <h4 class="text-[15px] font-semibold text-slate-900">${s.title}</h4>
+            </div>
+        </div>
+    `).join('')
+}
+
 function artim(index, action) {
     if(action === 'plus') {
         sebet[index].count += 1
@@ -158,10 +173,46 @@ function artim(index, action) {
 
 srchinput.addEventListener('input', (e) => {
     searchData(e.target.value)
+    e.target.value == '' ? srcList.style.display = 'none' : srcList.style.display = 'block'
 })
 
 function searchData(srchinput) {
     const key = srchinput.toLowerCase();
-    const filtr = data.filter(item => item.title.toLowerCase().includes(key))
-    getDataRender(filtr)
+    const filtr = data.filter(item => item.title.toLowerCase().startsWith(key))
+    // getDataRender(filtr)
+    srcListData(filtr)
+}
+
+
+// new fetch data order
+
+function slugCreate(title) {
+    return title
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Xüsusi simvolları silir
+    .replace(/[\s_-]+/g, '-') // Boşluqları tire ilə əvəz edir
+    .replace(/^-+|-+$/g, ''); // Başda və sonda tireni silir
+}
+
+
+
+function getWholeData() {
+    fetch(Base_API)
+    .then(res => res.json())
+    .then(data => {
+        cardList.innerHTML = data.map(item => {
+            const slug = slugCreate(item.title)
+            return `<div class="border border-green-400 p-3 h-fit rounded-lg">
+                        <img src="${item.image}" class="w-full h-full object-cover rounded">
+                        <h4 class="mt-2 font-bold"> ${item.title}</h4>
+                        <h5 class="mt-2 text-yellow-400 italic">${item.category}</h5>
+                        <p class="text-green-400">${item.price} AZN</p>
+                        <a  href="detail.htm?s=${slug}"  
+                        class="mt-3 text-white block text-center bg-blue-600 hover:bg-blue-700 p-2 rounded text-sm transition">
+                            Daha ətraflı
+                        </a>
+                    </div>`
+        }).join('')
+    })
 }

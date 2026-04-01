@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <div style="display: flex; justify-content: center; align-items: center;" id="detailContainer"></div>
+        
+        <script>
+            const Base_API = 'https://69b3c331e224ec066bdd03a6.mockapi.io/api/v1/Product'
+            let detailContainer = document.getElementById('detailContainer')
+
+            function slugCreate(title) {
+                return title
+                .toLowerCase()
+                .trim()
+                .replace(/[^\w\s-]/g, '') // Xüsusi simvolları silir
+                .replace(/[\s_-]+/g, '-') // Boşluqları tire ilə əvəz edir
+                .replace(/^-+|-+$/g, ''); // Başda və sonda tireni silir
+            }
+            
+            function getDetail() {
+                const params = new URLSearchParams(window.location.search)
+                const sentSlug = params.get('s')
+                fetch(Base_API)
+                .then(res => res.json())
+                .then(p => {
+                    const product = p.find(item => slugCreate(item.title) === sentSlug)
+                    detailContainer.innerHTML = `
+                    <div class="border border-green-400 p-3 h-fit rounded-lg">
+                       <img src="${product.image}" class="w-full h-full object-cover rounded">
+                       <h4 class="mt-2 font-bold">name: ${product.title}</h4>
+                       <h5 class="mt-2 text-yellow-400 italic">category: ${product.category}</h5>
+                       <p class="text-green-400">price: ${product.price} AZN</p>
+                   </div>`
+                })
+            }
+
+            getDetail()
+
+
+
+            // const id = params.get('id')
+            // fetch(`https://69b3c331e224ec066bdd03a6.mockapi.io/api/v1/Product/${id}`)
+            // .then(res => res.json())
+            // .then(data => detailContainer.innerHTML = `
+            //     <div class="border border-green-400 p-3 h-fit rounded-lg">
+            //         <img src="${data.image}" class="w-full h-full object-cover rounded">
+            //         <h4 class="mt-2 font-bold">name: ${data.title}</h4>
+            //         <h5 class="mt-2 text-yellow-400 italic">category: ${data.category}</h5>
+            //         <p class="text-green-400">price: ${data.price} AZN</p>
+            //     </div>
+            // `)
+        </script>
+    </body>
+</html>
